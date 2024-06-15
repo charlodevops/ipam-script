@@ -53,11 +53,6 @@ cidr_ip_calculator() {
   for ((i = network_int; i <= broadcast_int; i++)); do
       ip_array+=( "$(int_to_ip $i)" )
   done
-
-  for ip in "${ip_array[@]}"
-  do
-    echo $ip
-  done
 }
 
 # Function to find the pool ID containing the CIDR
@@ -66,7 +61,7 @@ find_pool_id() {
   describe_pools_output=$(aws ec2 describe-public-ipv4-pools --region "$AWS_REGION")
   cidr_ip_calculator
   
-  POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ip "${ip_array[0]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]?.FirstAddress == $ip) | .PoolId')
+  POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ipfst "${ip_array[0]}" --arg iplst "${ip_array[-1]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]? | (.FirstAddress == $ipfst and .LastAddress == $iplst)) | .PoolId')
   
   if [ -z "$POOL_ID" ]; then
     echo "Error: CIDR ${CIDR_VALUE} not found in any IPv4 pool"
