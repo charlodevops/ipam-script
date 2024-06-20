@@ -60,7 +60,7 @@ generate_ip_range_array() {
     last_ip=$Last_ip
 
     if [ -z "$First_ip" ] && [ -z "$Last_ip" ]; then
-      echo "1st and last IPs are empty"
+      echo "No Addresses Found"
       return 1
     fi
 
@@ -87,6 +87,8 @@ generate_ip_range_array() {
 
     # Append the IP addresses to the global array
     all_ip_addresses+=("${ip_pool_array[@]}")
+
+    echo "IP addresses are ${ip_pool_array[*]}"
 }
 
 # Function to find the pool ID containing the CIDR
@@ -94,7 +96,7 @@ find_pool_id() {
   echo "Finding CIDR ${CIDR_VALUE} in the IPv4 pool"
   describe_pools_output=$(aws ec2 describe-public-ipv4-pools --region "$AWS_REGION")
   cidr_ip_calculator
-  echo "IP addresses in ${ip_array[*]}"
+  echo "IP addresses in CIDR are ${ip_array[*]}"
 
   all_ip_addresses=()
   Pool_ids=$(echo "$describe_pools_output" | jq -r '.PublicIpv4Pools[].PoolId')
@@ -105,7 +107,6 @@ find_pool_id() {
     First_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].FirstAddress')
     Last_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].LastAddress')
     generate_ip_range_array
-    echo "IP addresses are ${ip_pool_array[*]}"
   done
 
   # the 1st ip address
@@ -122,9 +123,8 @@ find_pool_id() {
 
     # Iterate over each IP in ip_array
     for IP in "${ips[@]}"; do
-    echo "IP $ip did not match $IP outside if"
       if [[ "$IP" == "$ip" ]]; then
-        echo "IP $ip did not match $IP"
+        echo "$ip Found"
         break 2
       fi
     done
@@ -135,6 +135,7 @@ find_pool_id() {
 
   # Get the corresponding pool_id
   POOL_ID=${Pool_ids[counter]}
+  echo "Select pool id is $POOL_ID"
 
   # POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ipfst "${ip_array[0]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]? | (.FirstAddress == $ipfst)) | .PoolId')
   
@@ -150,7 +151,7 @@ find_pool_id() {
 # Function to deprovision the CIDR block
 deprovision_cidr() {
     echo "Deprovisioning CIDR ${ip_array[0]}/32 from pool $POOL_ID in region $AWS_REGION for account $AWS_ACCOUNT_NAME..." 
-    local output=$(aws ec2 deprovision-public-ipv4-pool-cidr --region $AWS_REGION --pool-id $POOL_ID --cidr ${ip_array[0]}/32 2>&1)
+    local output=$(aws ec2 deprovision-public-ipv4-pool-cidr --region "$AWS_REGION" --pool-id "$POOL_ID" --cidr "${ip_array[0]}/32" 2>&1)
     echo $output
     local status=$?
 
