@@ -59,6 +59,12 @@ generate_ip_range_array() {
     first_ip=$First_ip
     last_ip=$Last_ip
 
+    if [ -z "$First_ip" ] && [ -z "$Last_ip" ]; then
+      echo "1st and last IPs are empty"
+      return 1
+    fi
+
+
     # Extract the octets of the first and last IP addresses
     IFS='.' read -r -a first_ip_octets <<< "$first_ip"
     IFS='.' read -r -a last_ip_octets <<< "$last_ip"
@@ -97,26 +103,26 @@ find_pool_id() {
   do
     echo "Addresses in $pool_id Pool Id"
     First_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].FirstAddress')
-    echo $First_ip
     Last_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].LastAddress')
-    echo $Last_ip
     generate_ip_range_array
     echo "IP addresses are ${ip_pool_array[*]}"
   done
 
   # the 1st ip address
   ip=${ip_array[0]}
-  echo "IP address to be checked"
+  echo "IP address to be checked $ip"
   # Initialize the counter
   counter=0
 
   # Iterate over all_ip_addresses
   for ips in "${all_ip_addresses[@]}"; do
     # Split ips into an array
+    echo $ips
     IFS=' ' read -r -a ip_array <<< "$ips"
 
     # Iterate over each IP in ip_array
-    for IP in "${ip_array[@]}"; do
+    for IP in "${ips[@]}"; do
+    echo "IP $ip did not match $IP outside if"
       if [[ "$IP" == "$ip" ]]; then
         echo "IP $ip did not match $IP"
         break 2
