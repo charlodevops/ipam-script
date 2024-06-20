@@ -109,7 +109,7 @@ find_pool_id() {
   done
 
   # the 1st ip address
-  ip=${ip_array[0]}
+  ip=${CIDR_VALUE::-3}
   echo "IP address to be checked $ip"
   # Initialize the counter
   counter=0
