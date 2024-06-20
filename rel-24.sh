@@ -151,6 +151,7 @@ find_pool_id() {
 deprovision_cidr() {
     echo "Deprovisioning CIDR ${ip_array[0]}/32 from pool $POOL_ID in region $AWS_REGION for account $AWS_ACCOUNT_NAME..." 
     local output=$(aws ec2 deprovision-public-ipv4-pool-cidr --region $AWS_REGION --pool-id $POOL_ID --cidr ${ip_array[0]}/32 2>&1)
+    echo $output
     local status=$?
 
     if [ $status -ne 0 ]; then
