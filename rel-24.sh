@@ -95,9 +95,11 @@ find_pool_id() {
   echo ${Pool_ids[*]}
   for pool_id in ${Pool_ids[@]}
   do
-    echo "Addresses in $ip Pool Id"
+    echo "Addresses in $pool_id Pool Id"
     First_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].FirstAddress')
+    echo $First_ip
     Last_ip=$(echo "$describe_pools_output" | jq -r --arg pool_id "$pool_id" '.PublicIpv4Pools[] | select(.PoolId == $pool_id) | .PoolAddressRanges[].LastAddress')
+    echo $Last_ip
     generate_ip_range_array
     echo "IP addresses are ${ip_pool_array[*]}"
   done
@@ -128,7 +130,7 @@ find_pool_id() {
   # Get the corresponding pool_id
   POOL_ID=${Pool_ids[counter]}
 
-#   POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ipfst "${ip_array[0]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]? | (.FirstAddress == $ipfst)) | .PoolId')
+  # POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ipfst "${ip_array[0]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]? | (.FirstAddress == $ipfst)) | .PoolId')
   
   if [ -z "$POOL_ID" ]; then
     echo "Error: CIDR ${CIDR_VALUE} not found in any IPv4 pool"
