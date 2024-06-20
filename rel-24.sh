@@ -134,6 +134,7 @@ find_pool_id() {
   done
 
   # Get the corresponding pool_id
+  IFS=' ' read -r -a Pool_ids <<< "$Pool_ids"
   POOL_ID=${Pool_ids[counter]}
   echo "Select pool id is $POOL_ID"
 
