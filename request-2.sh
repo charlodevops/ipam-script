@@ -7,7 +7,7 @@
 
 AWS_REGION=$1
 POOL_ID=$2
-CIDR_VALUE=$3 .... for ex. /32  /31  /30  /28
+CIDR_VALUE=$3
 echo $CIDR_VALUE
 SHARED_IPAM_POOL_ID=$4
 ACCT_ID=$5
@@ -72,4 +72,5 @@ else
   echo "Failed to allocate ${CIDR_VALUE} CIDR into the IPv4 pool."
   exit 1
 fi
+
 
