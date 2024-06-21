@@ -20,15 +20,15 @@ cidr_ip_calculator() {
 
   # Function to convert an IP address to a 32-bit integer
   ip_to_int() {
-      local IFS=.
-      local -a octets=($1)
-      echo $(( (octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3] ))
+    local IFS=.
+    local -a octets=($1)
+    echo $(( (octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3] ))
   }
 
   # Function to convert a 32-bit integer to an IP address
   int_to_ip() {
-      local ip=$1
-      echo "$(( (ip >> 24) & 0xFF )).$(( (ip >> 16) & 0xFF )).$(( (ip >> 8) & 0xFF )).$(( ip & 0xFF ))"
+    local ip=$1
+    echo "$(( (ip >> 24) & 0xFF )).$(( (ip >> 16) & 0xFF )).$(( (ip >> 8) & 0xFF )).$(( ip & 0xFF ))"
   }
 
   # Extract the IP address and the subnet mask
@@ -56,39 +56,39 @@ cidr_ip_calculator() {
 }
 
 generate_ip_range_array() {
-    first_ip=$First_ip
-    last_ip=$Last_ip
+  first_ip=$First_ip
+  last_ip=$Last_ip
 
-    if [ -z "$First_ip" ] && [ -z "$Last_ip" ]; then
-      echo "No Addresses Found"
-      return 1
-    fi
+  if [ -z "$First_ip" ] && [ -z "$Last_ip" ]; then
+    echo "No Addresses Found"
+    return 1
+  fi
 
 
-    # Extract the octets of the first and last IP addresses
-    IFS='.' read -r -a first_ip_octets <<< "$first_ip"
-    IFS='.' read -r -a last_ip_octets <<< "$last_ip"
+  # Extract the octets of the first and last IP addresses
+  IFS='.' read -r -a first_ip_octets <<< "$first_ip"
+  IFS='.' read -r -a last_ip_octets <<< "$last_ip"
 
-    # Convert the octets to integers
-    first_octet=${first_ip_octets[0]}
-    second_octet=${first_ip_octets[1]}
-    third_octet=${first_ip_octets[2]}
-    fourth_octet=${first_ip_octets[3]}
+  # Convert the octets to integers
+  first_octet=${first_ip_octets[0]}
+  second_octet=${first_ip_octets[1]}
+  third_octet=${first_ip_octets[2]}
+  fourth_octet=${first_ip_octets[3]}
 
-    last_octet=${last_ip_octets[3]}
+  last_octet=${last_ip_octets[3]}
 
-    # Initialize an array to store the IP addresses
-    ip_pool_array=()
+  # Initialize an array to store the IP addresses
+  ip_pool_array=()
 
-    # Loop through the IP range and generate each IP address
-    for (( i = $fourth_octet; i <= $last_octet; i++ )); do
-        ip_pool_array+=("$first_octet.$second_octet.$third_octet.$i")
-    done
+  # Loop through the IP range and generate each IP address
+  for (( i = $fourth_octet; i <= $last_octet; i++ )); do
+      ip_pool_array+=("$first_octet.$second_octet.$third_octet.$i")
+  done
 
-    # Append the IP addresses to the global array
-    all_ip_addresses+=("${ip_pool_array[@]}")
+  # Append the IP addresses to the global array
+  all_ip_addresses+=("${ip_pool_array[@]}")
 
-    echo "IP addresses are ${ip_pool_array[*]}"
+  echo "IP addresses are ${ip_pool_array[*]}"
 }
 
 # Function to find the pool ID containing the CIDR
@@ -137,8 +137,6 @@ find_pool_id() {
   IFS=' ' read -r -a Pool_ids <<< "$Pool_ids"
   POOL_ID=${Pool_ids[counter]}
   echo "Select pool id is $POOL_ID"
-
-  # POOL_ID=$(echo "$describe_pools_output" | jq -r --arg ipfst "${ip_array[0]}" '.PublicIpv4Pools[] | select(.PoolAddressRanges[]? | (.FirstAddress == $ipfst)) | .PoolId')
   
   if [ -z "$POOL_ID" ]; then
     echo "Error: CIDR ${CIDR_VALUE} not found in any IPv4 pool"
@@ -151,17 +149,17 @@ find_pool_id() {
 
 # Function to deprovision the CIDR block
 deprovision_cidr() {
-    echo "Deprovisioning CIDR "${CIDR_VALUE::-3}/32" from pool $POOL_ID in region $AWS_REGION for account $AWS_ACCOUNT_NAME..." 
-    local output=$(aws ec2 deprovision-public-ipv4-pool-cidr --region "$AWS_REGION" --pool-id "$POOL_ID" --cidr "${CIDR_VALUE::-3}/32" 2>&1)
-    echo $output
-    local status=$?
+  echo "Deprovisioning CIDR "${CIDR_VALUE::-3}/32" from pool $POOL_ID in region $AWS_REGION for account $AWS_ACCOUNT_NAME..." 
+  local output=$(aws ec2 deprovision-public-ipv4-pool-cidr --region "$AWS_REGION" --pool-id "$POOL_ID" --cidr "${CIDR_VALUE::-3}/32" 2>&1)
+  echo $output
+  local status=$?
 
-    if [ $status -ne 0 ]; then
+  if [ $status -ne 0 ]; then
     echo "Failed to deprovision CIDR: $output"
     return $status
-    else
+  else
     echo "Successfully deprovisioned CIDR: $CIDR_VALUE"
-    fi
+  fi
 }
 
 # Execute the function
