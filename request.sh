@@ -1,4 +1,6 @@
 #!/bin/bash
+# 1. Check to see if an IPv4 pool already exists in this account in this region.  If not, create one.
+# 2. Provision a CIDR to the member account IPv4 pool from the shared regional IPAM pool that meets the size requested
 
 # Script to Request a CIDR block from an AWS IPv4 pool
 
