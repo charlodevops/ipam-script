@@ -1,32 +1,19 @@
 #!/bin/bash
-# 1. Check to see if an IPv4 pool already exists in this account in this region.  If not, create one.
-# 2. Provision a CIDR to the member account IPv4 pool from the shared regional IPAM pool that meets the size requested
-
 # Script to Request a CIDR block from an AWS IPv4 pool
+# 1. Check to see if an IPv4 pool already exists in this account in this region.  If not, create one.
+# 2. Provision a CIDR specify by the requestor for ex. /32 /30 /31 /28 /24 to the member account IPv4 pool from the shared regional IPAM pool that meets the size requested
+
+
 
 AWS_REGION=$1
 POOL_ID=$2
-CIDR_VALUE=$3
+CIDR_VALUE=$3 .... for ex. /32  /31  /30  /28
 SHARED_IPAM_POOL_ID=$4
 ACCT_ID=$5
-
-
 
 #AWS_REGION="us-west-2" #not to be harded
 #POOL_ID="fico-public-ip-local-ipv4-pool"
 #SHARED_IPAM_POOL_ID="fico_shared_public_regional_us_west_2"
-
-
-ASSUME_ROLE="arn:aws:iam::${ACCT_ID}:role/GTS-AWSEngineering"
-ROLE_SESSION_NAME="terraform"
-TMP_FILE="/tmp/${ACCT_ID}.credentials"
-
-aws sts assume-role --output json --role-arn ${ASSUME_ROLE} --role-session-name ${ROLE_SESSION_NAME} > ${TMP_FILE}
-
-ACCESS_KEY=$(cat ${TMP_FILE} | jq -r ".Credentials.AccessKeyId")
-SECRET_KEY=$(cat ${TMP_FILE} | jq -r ".Credentials.SecretAccessKey")
-SESSION_TOKEN=$(cat ${TMP_FILE} | jq -r ".Credentials.SessionToken")
-EXPIRATION=$(cat ${TMP_FILE} | jq -r ".Credentials.Expiration")
 
 #Check if a public IPv4 pool with the specified name already exists
 echo "Checking for existing IPv4 pools with the name ${POOL_ID} in region ${AWS_REGION}..."
@@ -79,4 +66,4 @@ else
   echo "Failed to allocate ${CIDR_VALUE} CIDR into the IPv4 pool."
   exit 1
 fi
-rm $TMP_FILE
+
