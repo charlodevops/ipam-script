@@ -19,7 +19,7 @@ check_pool() {
   else
     # If no pool exists, create a new IPv4 pool
     echo "No existing IPv4 pool found with the name ${POOL_ID}. Creating a new pool..."
-    create_output=$(aws ec2 create-public-ipv4-pool --region $AWS_REGION --tag-specifications "ResourceType=public-ipv4-pool,Tags=[{Key=Name,Value=${POOL_ID}}]")
+    create_output=$(aws ec2 create-public-ipv4-pool --region $AWS_REGION --tag-specifications "ResourceType=ipv4pool-ec2,Tags=[{Key=Name,Value=${POOL_ID}}]")
 
     if [ $? -eq 0 ]; then
       echo "Successfully created IPv4 pool:"
